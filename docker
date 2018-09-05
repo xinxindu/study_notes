@@ -1,0 +1,19 @@
+docker 
+
+	创建本地仓库
+		修改docker配置
+			ExecStart=/usr/bin/dockerd \
+				--insecure-registry 192.168.1.9:5000 \  ----- 添加软件仓库
+			重启docker服务
+			
+		启动软件仓库容器
+			docker run -d -p 5000:5000 -v /opt/data/registry:/tmp/registry registry
+		
+	上传镜像到本地仓库
+		重打tag
+			docker tag mybox 192.168.1.9:5000/test
+		上传镜像到
+			 docker push 192.168.1.9:5000/test
+	
+	下载本地仓库的镜像
+		docker pull 192.168.1.9:5000/test
