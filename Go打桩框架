@@ -1,6 +1,21 @@
 GO的函数打桩
 测试框架
 1、GoConvey
+	参数说明：
+		它的第一个参数为实际值，第二个参数为断言函数变量，第三个参数或者没有（当第二个参数为类ShouldBeTrue形式的函数变量）或者有（当第二个函数为
+		类ShouldEqual形式的函数变量）
+
+	使用：
+		a、简单测试
+			func TestStringSliceEqual(t *testing.T) {
+				Convey("TestStringSliceEqual should return true when a != nil  && b != nil", t, func() {
+					a := []string{"hello", "goconvey"}
+					b := []string{"hello", "goconvey"}
+					So(StringSliceEqual(a, b), ShouldBeFalse)
+				})
+			}
+		b、Convey语句的嵌套
+			Convey语句可以无限嵌套，以体现测试用例之间的关系。需要注意的是，只有最外层的Convey需要传入*testing.T类型的变量t。
 
 2、GoStub
 	作用：为变量打桩
