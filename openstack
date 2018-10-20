@@ -1,0 +1,12 @@
+openstack
+CLI使用：
+格式
+	CMD <obj>-create [parm1] [parm2] ...
+	CMD <obj>-delete [parm]
+	CMD <obj>-update [parm1] [parm2] ...
+	CMD <obj>-list
+	CMD <obj>-show [parm]
+	CMD-->服务名，obj-->有时可以省略 
+		eg： neutron net-create； 
+		     nova boot；
+	CMD help [SUB-CMD]
