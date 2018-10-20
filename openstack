@@ -10,3 +10,85 @@ CLI使用：
 		eg： neutron net-create； 
 		     nova boot；
 	CMD help [SUB-CMD]
+	
+DHCP:
+	简述：
+		在网络节点上运行，提供dnsmasq实现dhcp功能
+		dnsmasq提供dhcp和dns功能
+		dnsmasq于networt是一一对应关系，为一个网络提供所有的enable了DHCP的subnet提供服务
+		
+	配置：
+	1、dhcp_agent.ini
+		dhcp_driver：实现DHCP的驱动。eg：Dnsmasq
+		interface_driver：连接DHCP namespace interface的驱动。eg：BridageInterface, OVSInterface
+	2、每个网络创建一个目录
+		/var/lib/neutron/dhcp/网络ID
+	3、dnsmasq启动参数
+		-dhcp-hostsfile   存放Interface的IP和MAC的对应关系
+		--interface    提供DHCP服务的interface，dnsmasq会在给接口上监听instance的DHCP请求
+		
+	流程：
+	1、Instance发送 DHCPDISCOVER 广播
+	2、dhsmasq在tap设备上监听，收到广播后回复 DHCPOFFER 消息
+	3、Instance发送 DHCPREQUEST 消息确认收到DHCPOFFER消息
+	4、dnsmasq收到回复 DHCPACK ，结束	
+	
+	日志：
+	记录在系统日志中
+		dnsmasq-dhcp[12011]: DHCPDISCOVER
+		dnsmasq-dhcp[12011]: DHCPOFFER(tapbf60be39-8c)
+		dnsmasq-dhcp[12011]: DHCPREQUEST(tapbf60be39-8c)
+		dnsmasq-dhcp[12011]: DHCPACK(tapbf60be39-8c)
+
+	
+NEUTRON:
+功能：
+1、二层转发
+	利用Linux Bridge、OVS实现VLAN网络、基于VxLAN和GRE技术的Overlay网络创建
+
+2、三层路由
+	虚拟路由器实现跨网段的通信
+
+3、负载均衡
+	将负载分发到多个Instance，如HAProxy、LBaaS
+
+4、防火墙
+	Secrity Group：限制进出Instance的网络包
+	Firewall-as-a-Service：限制进出虚拟路由器的网络包
+
+管理的网络资源：
+1、Network
+	一个隔离的二层广播域
+	
+2、Subnet
+	是一个IPv4或IPv6的地址段，Instance的IP从Subnet中分配
+
+3、Port
+	看做是虚拟交换机上的一个端口，port上定义了MAC和IP
+	当Instance的虚拟网卡VIF绑定到port时，port就会将MAC和IP分配给VIF
+	
+架构：由上向下调用
+1、neutron-server
+	对外提供OpenStack网络的API，并调用Plugin
+	
+2、plugins
+	维护OpenStack逻辑网络状态，并调用agent   ---> What(做什么)
+	分类：
+	a、core plugin：维护Neutron的network、subnet、port相关的资源信息， 对应agent的Linux Bridge、OVS等。
+	b、service plugin：提供routing、firewall、load balance服务。
+	
+3、agent
+	负责在 network provider上实现各种网络功能，调用provider   ---> How(怎么做)
+	
+4、network provider
+	提供网络服务的虚拟或物理网络设备，eg：Linux Bridge、OVS
+	
+5、Queue
+	组件间通过其进行通信和调用
+	
+6、Database
+	存放OpenStack的网络状态信息 eg：Network、Subnet、Port、Router
+	
+注意：
+	plugin、agent、network provider是配套出现的
+	
