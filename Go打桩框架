@@ -1,0 +1,80 @@
+GO的函数打桩
+测试框架
+1、GoConvey
+
+2、GoStub
+	作用：为变量打桩
+	使用：
+		a、变量打桩
+			stubs := Stub(&num, 150)
+			defer stubs.Reset()
+		b、函数打桩(扩展)
+				func Exec(cmd string, args ...string) (string, error) {
+					...
+				}
+			变形为：
+				var Exec = func(cmd string, args ...string) (string, error) {
+					...
+				}
+			打桩：
+				stubs := Stub(&Exec, func(cmd string, args ...string) (string, error) {
+							return "xxx-vethName100-yyy", nil
+				})
+				defer stubs.Reset()
+			等价于
+				stubs := StubFunc(&Exec,"xxx-vethName100-yyy", nil)
+				defer stubs.Reset()
+		c、没有返回值的函数打桩
+			stubs := StubFunc(&DestroyResource)
+			defer stubs.Reset()		
+	
+3、GoMock
+	作用：为interface打桩
+	组成：
+		GoMock：完成对桩对象生命周期的管理
+		mockgen：用来生成interface对应的Mock类源文件
+	使用：
+		a、生成mock类文件
+			（1）源文件模式：mockgen -source=foo.go [other options]
+				-source: 一个文件包含打算mock的接口列表
+				-destination: 存放mock类代码的文件。如果你没有设置这个选项，代码将被打印到标准输出
+				-package: 用于指定mock类源文件的包名。如果你没有设置这个选项，则包名由mock_和输入文件的包名级联而成
+			（2）反射模式：mockgen database/sql/driver Conn,Driver   
+				第一个参数是基于GOPATH的相对路径，第二个参数可以为多个interface，并且interface之间只能用逗号分隔，不能有空格
+		b、导入mock相关的包
+		c、mock控制器
+			mock控制器通过NewController接口生成，是mock生态系统的顶层控制，它定义了mock对象的作用域和生命周期
+				ctrl := NewController(t)
+				defer ctrl.Finish()
+		d、mock对象创建
+			mock对象创建时需要注入控制器，如果有多个mock对象则注入同一个控制器
+				mockRepo := mock_db.NewMockRepository(ctrl)
+				mockHttp := mock_api.NewHttpMethod(ctrl)
+		e、mock对象的行为注入
+				mockRepo.EXPECT().Retrieve(Any()).Return(nil, ErrAny)
+				mockRepo.EXPECT().Create(Any(), Any()).Return(nil)
+		f、mock对象的注入
+			mock对象的行为都注入到控制器以后，我们接着要将mock对象注入给interface，使得mock对象在测试中生效
+				stubs := StubFunc(&redisrepo.GetInstance, mockDb)
+				defer stubs.Reset()
+			
+4、Monkey
+	作用：函数或方法的打桩
+		  但Monkey不是线程安全的，不要将Monkey用于并发的测试中
+	使用：
+		a、为一个函数打桩
+			guard := Patch(osencap.Exec, func(_ string, _ ...string) (string, error) {
+                return outputExpect, nil
+            })
+            defer guard.Unpatch()
+		b、没有返回值的函数打桩
+			guard := Patch(DestroyResource, func(_ string) {
+
+			})
+			defer guard.Unpatch()
+		c、为类的方法打桩
+			var e *Etcd
+			guard := PatchInstanceMethod(reflect.TypeOf(e), "Get", func(_ *Etcd, _ string) []string {
+				return []string{"task1", "task5", "task8"}
+			})
+			defer guard.Unpatch()
