@@ -1,0 +1,14 @@
+macvlan
+定义：
+macvlan 本身是 linxu kernel 模块，macvlan 本质上是一种网卡虚拟化技术
+
+功能：
+是允许在同一个物理网卡上配置多个是允许在同一个物理网卡上配置多个 MAC 地址，即多个 interface，每个 interface 可以配置自己的 IP。
+
+优点：
+性能极好，相比其他实现，macvlan是性能极好，相比其他实现，macvlan 不需要创建 Linux bridge，而是直接通过以太 interface 连接到物理网络
+
+用 sub-interface 实现多 macvlan 网络：
+1、macvlan 会独占主机的网卡，也就是说一个网卡只能创建一个 macvlan 网络，否则会报错
+2、Linux 的网卡也能支持 VLAN（apt-get install vlan），同一个 interface 可以收发多个 VLAN 的数据包，不过前提是要创建 VLAN 的 sub-interface
+3、enp0s9 要接在交换机的 trunk 口上
