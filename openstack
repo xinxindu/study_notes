@@ -96,4 +96,20 @@ Neutron Server的分层：
    Extension Plugin API：定义了ServicePlugin的抽象功能集合
 5、Core Plugin：实现了Core Plugin API，操作数据库，并调用相应的agent在network provider上执行相关操作
    Service Plugin：实现了Extension Plugin API，操作数据库，并调用相应的agent在network provider上执行相关操作
+   
+ML2架构 -- 新一代的Core plugin的框架
+	Type Driver
+	作用：负责维护网络类型的状态，执行验证、创建网络等
+	      Neutron支持的每一种网路类型都有一个对应的ML2 Type Driver
+	支持网络类型：local、flat、vlan、vxlan、gre
+	  
+Mechansim Driver
+	作用：负责获取由Type Driver维护的网络状态，并确保在相应的网络设备（物理或虚拟）上正确实现
+	支持类型：
+	Agent-based
+		LinuxBridge、OpenVswitch
+	Controller-based
+		OpenDaylight、VMWare NSX
+	基于物理交换机
+		Cisco Nexus、Arista、Mellanox
 	
