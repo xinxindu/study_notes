@@ -113,3 +113,20 @@ Mechansim Driver
 	基于物理交换机
 		Cisco Nexus、Arista、Mellanox
 	
+	
+Nova
+作用：负责维护和管理云环境的计算资源
+架构：
+1、nova-api   接收和响应客户的API调用
+2、nova-scheduler   虚机调度服务，决定在哪个计算节点上运行虚机
+3、nova-computer    抵用Hypervisor API 实现虚机的生命周期管理 		（只有它计算节点）
+	Hypervisor  计算节点上跑的虚拟化管理程序，虚机管理最底层的程序
+4、nova-conductor   nova-computer通过它来间接访问数据库
+5、nova-console    访问虚机的控制台
+   nova-consoleauth  访问虚机的控制台请求提供Token认证
+   nova-cert      提供x509的证书支持
+6、Database
+7、Message Queue  子服务信息的中转战
+
+组件位置： 
+	只有nova-computer在计算节点，其他都在控制节点上
