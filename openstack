@@ -130,3 +130,9 @@ Nova
 
 组件位置： 
 	只有nova-computer在计算节点，其他都在控制节点上
+	
+通用设计思路：
+1、API前端服务   nova组件对外唯一的窗口 nova-api
+2、Scheduler调度  从实体中挑选出一个最合适的来执行操作
+3、Worker工作服务 是nova-computer，将scheduler从worker中划分出来，是openstack非常容易扩展
+4、基于Driver的框架技术  计算节点支持多种Hypervisor（KVM、VMWare、Xen、Docker），为Hypervisor定义统一的接口
